@@ -2,7 +2,14 @@
 #include <stdlib.h>
 #include <time.h>
 
-/* Main function */
+/**
+ * main - Entry point of the program
+ *
+ * Description: Generates a random number n and prints whether it is
+ * positive, negative, or zero.
+ *
+ * Return: 0 on success
+ */
 int main(void)
 {
 	int n;

@@ -2,46 +2,59 @@
 #include <stdarg.h>
 #include <stdio.h>
 
+typedef struct printer
+{
+	char *symbol;
+	void (*print)(va_list);
+} printer_t;
+
+void print_char(va_list ap) { printf("%c", va_arg(ap, int)); }
+void print_int(va_list ap) { printf("%d", va_arg(ap, int)); }
+void print_float(va_list ap) { printf("%f", va_arg(ap, double)); }
+void print_string(va_list ap)
+{
+	char *s = va_arg(ap, char *);
+
+	if (s == NULL)
+		s = "(nil)";
+	printf("%s", s);
+}
+
 /**
  * print_all - prints anything
- * @format: list of types of arguments passed
+ * @format: list of argument types
  */
 void print_all(const char * const format, ...)
 {
-	va_list args;
-	unsigned int i = 0;
-	char *s, *sep = "";
+	va_list ap;
+	printer_t p[] = {
+		{"c", print_char},
+		{"i", print_int},
+		{"f", print_float},
+		{"s", print_string},
+		{NULL, NULL}
+	};
+	unsigned int i = 0, j;
+	char *sep = "";
 
-	va_start(args, format);
+	va_start(ap, format);
 
 	while (format && format[i])
 	{
-		if (format[i] == 'c')
+		j = 0;
+		while (p[j].symbol)
 		{
-			printf("%s%c", sep, va_arg(args, int));
-			sep = ", ";
-		}
-		if (format[i] == 'i')
-		{
-			printf("%s%d", sep, va_arg(args, int));
-			sep = ", ";
-		}
-		if (format[i] == 'f')
-		{
-			printf("%s%f", sep, va_arg(args, double));
-			sep = ", ";
-		}
-		if (format[i] == 's')
-		{
-			s = va_arg(args, char *);
-			if (s == NULL)
-				s = "(nil)";
-			printf("%s%s", sep, s);
-			sep = ", ";
+			if (format[i] == p[j].symbol[0])
+			{
+				printf("%s", sep);
+				p[j].print(ap);
+				sep = ", ";
+			}
+			j++;
 		}
 		i++;
 	}
 
-	va_end(args);
+	va_end(ap);
 	printf("\n");
 }
